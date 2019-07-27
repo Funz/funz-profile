@@ -110,6 +110,7 @@
         <copy todir="${dist.lib.dir}" failonerror="false">
             <fileset dir="${lib.dir}">
                 <include name="*" />
+                <exclude name="Funz*" />
             </fileset>
         </copy>
     </target>
@@ -201,20 +202,6 @@
     
         <chmod dir="${install.dir}" perm="ugo+rx" includes="**/*.sh"/>
         <chmod dir="${install.dir}" perm="ugo+rx" includes="**/*.bat"/>
-    </target>
-
-    <!-- copy/zip dist -->
-    <target name="pack-plugin" depends="dist">
-        <zip file="plugin-${code.name}.zip">
-            <fileset dir="${dist.dir}"/>
-        </zip>
-    </target>
-
-    <!-- copy/zip install -->
-    <target name="pack-with-funz" depends="install">
-        <zip file="Funz${code.name}.zip">
-            <fileset dir="${install.dir}"/>
-        </zip>
     </target>
 
     <!-- run reference cases. Just put input files inside src/test/cases/testname/* (usually, testname is the first input file name) -->
