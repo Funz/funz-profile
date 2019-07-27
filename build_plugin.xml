@@ -72,7 +72,7 @@
 
     <path id="test.classpath" >
         <path refid="plugin.classpath" />
-        <fileset dir="${build.dir}"/>
+        <pathelement location="${build.dir}" />
     </path>
 
     <!-- clean: remove all generated files -->
