@@ -150,7 +150,7 @@
     </target>
 
     <!-- dist: copy the plugin ascii files -->
-    <target name="dist-ioplugin" depends="samples, scripts">
+    <target name="dist-ioplugin" depends="samples, scripts, get-funz">
         <mkdir dir="${build.dir}" />
         <mkdir dir="${dist.dir}" />
         <mkdir dir="${dist.scripts.dir}" />
