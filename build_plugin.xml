@@ -110,7 +110,7 @@
         <copy todir="${dist.lib.dir}" failonerror="false">
             <fileset dir="${lib.dir}">
                 <include name="*" />
-                <exclude name="Funz*" />
+                <exclude name="Funz-*" />
             </fileset>
         </copy>
     </target>
@@ -281,8 +281,6 @@
         <echo message="dist                  :   generate the distribution" />
         <echo message="run-reference-cases   :   launch cases to build reference (check carefuly the results !)" />
         <echo message="test                  :   launch the plugin's tests" />        
-        <echo message="pack-plugin           :   generate a distribution (this plugin only)" />
-        <echo message="pack-with-funz        :   generate a package (Funz + this plugin)" />
     </target>
 
 </project>
