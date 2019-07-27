@@ -84,7 +84,7 @@
         <delete dir="${install.dir}" />
     </target>
 
-    <!-- copy samples in dist dir -->
+    <!-- copy resources in dist dir -->
     <target name="samples">
         <mkdir dir="${dist.samples.dir}" />
         <copy todir="${dist.samples.dir}">
@@ -96,7 +96,6 @@
 
     <target name="scripts">
         <mkdir dir="${dist.scripts.dir}" />
-        
         <copy todir="${dist.scripts.dir}">
             <fileset dir="${scripts.dir}">
                 <include name="*" />
@@ -105,9 +104,18 @@
         <chmod dir="${dist.scripts.dir}" perm="ugo+rx" includes="**/*.sh"/>
         <chmod dir="${dist.scripts.dir}" perm="ugo+rx" includes="**/*.bat"/>
     </target>
+
+    <target name="libs">
+        <mkdir dir="${dist.lib.dir}" />
+        <copy todir="${dist.lib.dir}">
+            <fileset dir="${lib.dir}">
+                <include name="*" />
+            </fileset>
+        </copy>
+    </target>
     
     <!-- dist: compile the plugin classes and create 2 jars -->
-    <target name="dist-iopluginjar" depends="samples, scripts, get-funz">
+    <target name="dist-iopluginjar" depends="samples, scripts, libs, get-funz">
         <mkdir dir="${build.dir}" />
         <mkdir dir="${dist.dir}" />
         <mkdir dir="${dist.scripts.dir}" />
@@ -150,7 +158,7 @@
     </target>
 
     <!-- dist: copy the plugin ascii files -->
-    <target name="dist-ioplugin" depends="samples, scripts, get-funz">
+    <target name="dist-ioplugin" depends="samples, scripts, libs, get-funz">
         <mkdir dir="${build.dir}" />
         <mkdir dir="${dist.dir}" />
         <mkdir dir="${dist.scripts.dir}" />
@@ -253,14 +261,14 @@
                 </script>
                 <echo level="error">Start: ${startDate}</echo>
                 
-                <record name="@{test.name}.json" action="start" />
-                <exec dir="${test.cases.dir}/@{test.name}" executable="/bin/bash" osfamily="unix" failonerror="false" timeout="60000">
+                <record name="@{test.name}.log" action="start" />
+                <exec dir="${test.cases.dir}/@{test.name}" executable="/bin/bash" osfamily="unix" failonerror="false"> <!-- timeout="60000" -->
                     <arg value="${install.dir}/Funz.sh"/> 
                     <arg value="Run"/> 
                     <arg value="-m ${code.name}"/>
                     <arg value="-if @{test.name} ${input.list.@{test.name}}" /> <!-- add other files given there -->
                 </exec>
-                <record name="@{test.name}.json" action="stop"/>
+                <record name="@{test.name}.log" action="stop"/>
                 
                 <script language="javascript">
                     project.setProperty('elapsedTime', new Date().getTime() - startTime)
@@ -284,7 +292,7 @@
         <echo message="help                  :   display this help" />
         <echo message="clean                 :   clean build, dist and temp directories" />
         <echo message="dist                  :   generate the distribution" />
-        <echo message="run-reference-cases   :   launch Funz on reference cases (check carefuly the results !)" />
+        <echo message="run-reference-cases   :   launch cases to build reference (check carefuly the results !)" />
         <echo message="test                  :   launch the plugin's tests" />        
         <echo message="pack-plugin           :   generate a distribution (this plugin only)" />
         <echo message="pack-with-funz        :   generate a package (Funz + this plugin)" />
