@@ -1,0 +1,293 @@
+<project name="build_plugin" default="test">
+    <!--abstract tasks for plugin, to be imported in plugin build.xml-->   
+    
+    <property name="plugin.properties" location="../funz-profile/plugin.properties" />
+    <property file="${plugin.properties}" />
+    <!-- verify that the ${plugin.properties} file has been set -->
+    <fail message="Set the plugin properties file ${plugin.properties} from funz-profile">
+        <condition>
+            <not>
+                <and>
+                    <available file="${plugin.properties}" type="file" />
+                </and>
+            </not>
+        </condition>
+    </fail>
+
+    <property name="funz.properties" location="../funz-profile/funz.properties" />
+    <property file="${funz.properties}" />
+    <!-- verify that the ${funz.properties} file has been set -->
+    <fail message="Set the funz properties file ${funz.properties} from funz-profile">
+        <condition>
+            <not>
+                <and>
+                    <available file="${funz.properties}" type="file" />
+                </and>
+            </not>
+        </condition>
+    </fail>
+
+    <path id="antcontrib.classpath">
+        <pathelement location="../funz-profile/lib/ant-contrib-0.6.jar" />
+    </path>
+
+    <taskdef name="for" taskname="for" classname="net.sf.antcontrib.logic.For" classpathref="antcontrib.classpath" />
+    <taskdef name="if" taskname="if" classname="net.sf.antcontrib.logic.IfTask" classpathref="antcontrib.classpath" />
+    <taskdef name="propertycopy" taskname="propertycopy" classname="net.sf.antcontrib.property.PropertyCopy" classpathref="antcontrib.classpath" />
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="antcontrib.classpath" />
+
+    <!-- get empty Funz (given version) -->
+    <import file="../funz-profile/proxy_conf.xml"/> <!-- fill with your conf if needed -->
+    <property name="funz-calculator.install.src" value="https://github.com/Funz/funz-calculator/releases/download/v${funz.version}"/>
+    <property name="funz-client.install.src" value="https://github.com/Funz/funz-client/releases/download/v${funz.version}"/>
+    <target name="get-funz" depends="proxy">
+        <if>
+            <available file="funz-calculator.zip" type="file" />
+            <then></then>
+            <else>
+                <get src="${funz-calculator.install.src}/funz-calculator.zip" dest="funz-calculator.zip"/>
+            </else>
+        </if>
+        <unzip src="funz-calculator.zip" dest="${funz.dir}" overwrite="true"/>
+        
+        <if>
+            <available file="funz-client.zip" type="file" />
+            <then></then>
+            <else>
+                <get src="${funz-client.install.src}/funz-client.zip" dest="funz-client.zip"/>
+            </else>
+        </if>
+        <unzip src="funz-client.zip" dest="${funz.dir}" overwrite="true"/>
+    </target>
+    
+    <!-- pathes and classpathes -->
+    <path id="funz.classpath" >
+        <fileset dir="${funz.lib.dir}" includes="**/*.jar" />
+    </path>
+
+    <path id="plugin.classpath" >
+        <path refid="funz.classpath" />
+        <fileset dir="${lib.dir}" includes="**/*.jar" />
+    </path>
+
+    <path id="test.classpath" >
+        <path refid="plugin.classpath" />
+        <fileset dir="${build.dir}"/>
+    </path>
+
+    <!-- clean: remove all generated files -->
+    <target name="clean" description="clean up">
+        <delete dir="${dist.dir}" failonerror="false" />
+        <delete dir="${pack.dir}" failonerror="false" />
+        <delete dir="${build.dir}" failonerror="false" />
+        <delete dir="${funz.dir}" failonerror="false" />
+        <delete dir="${install.dir}" />
+    </target>
+
+    <!-- copy samples in dist dir -->
+    <target name="samples">
+        <mkdir dir="${dist.samples.dir}" />
+        <copy todir="${dist.samples.dir}">
+            <fileset dir="${samples.dir}">
+                <include name="*" />
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="scripts">
+        <mkdir dir="${dist.scripts.dir}" />
+        
+        <copy todir="${dist.scripts.dir}">
+            <fileset dir="${scripts.dir}">
+                <include name="*" />
+            </fileset>
+        </copy>
+        <chmod dir="${dist.scripts.dir}" perm="ugo+rx" includes="**/*.sh"/>
+        <chmod dir="${dist.scripts.dir}" perm="ugo+rx" includes="**/*.bat"/>
+    </target>
+    
+    <!-- dist: compile the plugin classes and create 2 jars -->
+    <target name="dist-iopluginjar" depends="samples, scripts, get-funz">
+        <mkdir dir="${build.dir}" />
+        <mkdir dir="${dist.dir}" />
+        <mkdir dir="${dist.scripts.dir}" />
+        <mkdir dir="${dist.samples.dir}" />
+        <mkdir dir="${dist.plugin.dir}" />
+        <mkdir dir="${dist.plugin.io.dir}" />
+        <mkdir dir="${dist.plugin.calc.dir}" />
+
+        <javac classpathref="plugin.classpath"
+               deprecation="true"
+               source="${java.compiler.version}"
+               target="${java.compiler.version}"
+               excludes="**/*CPlugin*"
+               srcdir="${src.dir}"
+               destdir="${build.dir}"
+               encoding="ISO-8859-1"
+               debug="true" />
+        <jar destfile="${dist.plugin.io.dir}/${code.name}.ioplugin.jar">
+            <fileset dir="${build.dir}">
+                <include name="org/funz/**/${code.name}IOPlugin*.class" />
+                <include name="org/funz/**/*Helper.class" />
+            </fileset>
+        </jar>
+
+        <javac classpathref="plugin.classpath"
+               deprecation="true"
+               source="${java.compiler.version}"
+               target="${java.compiler.version}"
+               excludes="**/*IOPlugin*"
+               srcdir="${src.dir}"
+               destdir="${build.dir}"
+               encoding="ISO-8859-1"
+               debug="true" />
+        <jar destfile="${dist.plugin.calc.dir}/${code.name}.cplugin.jar">
+            <fileset dir="${build.dir}">
+                <include name="org/funz/**/${code.name}CPlugin*.class" />
+                <include name="org/funz/**/*Helper.class" />
+            </fileset>
+        </jar>
+    </target>
+
+    <!-- dist: copy the plugin ascii files -->
+    <target name="dist-ioplugin" depends="samples, scripts">
+        <mkdir dir="${build.dir}" />
+        <mkdir dir="${dist.dir}" />
+        <mkdir dir="${dist.scripts.dir}" />
+        <mkdir dir="${dist.samples.dir}" />
+        <mkdir dir="${dist.plugin.dir}" />
+        <mkdir dir="${dist.plugin.io.dir}" />
+
+        <copy todir="${dist.plugin.io.dir}">
+            <fileset file="${ioplugin.dir}/*" />
+        </copy>
+    </target>
+
+    <!-- install a copy of funz and a copy of the plugin. Needed for test or (full) pack-->
+    <target name="install" depends="get-funz, dist">
+        <copy todir="${install.dir}" includeemptydirs="yes">
+            <fileset dir="${funz.dir}" />
+        </copy>
+        <copy todir="${install.dir}" includeemptydirs="yes" overwrite="true">
+            <fileset dir="${dist.dir}" />
+        </copy>
+
+        <!-- detects the command script -->
+        <condition property="command" value=".\scripts\${code.name}.bat" >
+            <os family="windows"/>
+        </condition>
+        <condition property="command"  value="./scripts/${code.name}.sh" >
+            <os family="unix"/>
+        </condition>
+
+        <!-- append code command in calculator.xml -->
+        <if>
+            <available file="${install.dir}/plugins/calc/${code.name}.cplugin.jar" />
+            <then>
+                <replace file="${install.dir}/calculator.xml" token="/CALCULATOR" value="CODE name='${code.name}' cplugin='file:plugins/calc/${code.name}.cplugin.jar' command='./scripts/${code.name}.sh' /&gt;&lt;/CALCULATOR" />
+            </then>
+            <else>
+                <replace file="${install.dir}/calculator.xml" token="/CALCULATOR" value="CODE name='${code.name}' command='${command}' /&gt;&lt;/CALCULATOR" />
+            </else>
+        </if>
+    
+        <chmod dir="${install.dir}" perm="ugo+rx" includes="**/*.sh"/>
+        <chmod dir="${install.dir}" perm="ugo+rx" includes="**/*.bat"/>
+    </target>
+
+    <!-- copy/zip dist -->
+    <target name="pack-plugin" depends="dist">
+        <zip file="plugin-${code.name}.zip">
+            <fileset dir="${dist.dir}"/>
+        </zip>
+    </target>
+
+    <!-- copy/zip install -->
+    <target name="pack-with-funz" depends="install">
+        <zip file="Funz${code.name}.zip">
+            <fileset dir="${install.dir}"/>
+        </zip>
+    </target>
+
+    <!-- run reference cases. Just put input files inside src/test/cases/testname/* (usually, testname is the first input file name) -->
+    <target name="run-reference-cases" depends="install">
+        <exec dir="${install.dir}" executable="/bin/bash" osfamily="unix" failonerror="false" timeout="60000">
+            <arg value="${install.dir}/FunzDaemon_start.sh"/> 
+            <arg value="1"/> 
+        </exec>
+        
+     
+        <dirset id="tests" dir="${test.cases.dir}" includes="*"/>
+        <pathconvert pathsep="${line.separator}" property="tests.list" refid="tests">
+            <map from="${test.cases.dir}/" to=""/>
+        </pathconvert>
+
+
+        <for list="${tests.list}" param="test.name" delimiter="${line.separator}">
+            <sequential>
+                <echo message="========================================="/>
+                <echo message="============= @{test.name} ============="/>
+                <local name="current.time"/>
+                <tstamp>
+                    <format property="current.time" pattern="hh:mm:ss" />
+                </tstamp>
+                <echo message="============ ${current.time} ============"/> 
+                <echo message="========================================="/>
+
+                <!-- create input files list, without test name (will be added in 1st position later) -->
+                <fileset id="input.list" dir="${test.cases.dir}/@{test.name}" casesensitive="yes">
+                    <filename name="*"/>
+                    <filename name="**"/>
+                    <exclude name="@{test.name}"/>
+                    <exclude name="input"/>
+                    <exclude name="output"/>
+                    <exclude name="info.txt"/>
+                </fileset>
+                <pathconvert pathsep=" " property="input.list.@{test.name}" refid="input.list">
+                    <map from="${test.cases.dir}/@{test.name}/" to=""/>
+                </pathconvert>
+
+                <script language="javascript">
+                    project.setProperty('startTime', new Date().getTime());
+                    project.setProperty('startDate', new Date());
+                </script>
+                <echo level="error">Start: ${startDate}</echo>
+                
+                <record name="@{test.name}.json" action="start" />
+                <exec dir="${test.cases.dir}/@{test.name}" executable="/bin/bash" osfamily="unix" failonerror="false" timeout="60000">
+                    <arg value="${install.dir}/Funz.sh"/> 
+                    <arg value="Run"/> 
+                    <arg value="-m ${code.name}"/>
+                    <arg value="-if @{test.name} ${input.list.@{test.name}}" /> <!-- add other files given there -->
+                </exec>
+                <record name="@{test.name}.json" action="stop"/>
+                
+                <script language="javascript">
+                    project.setProperty('elapsedTime', new Date().getTime() - startTime)
+                </script>
+                <echo message=" Time: ${elapsedTime} ms"/>
+            </sequential>
+        </for>
+        
+        
+        <exec dir="${install.dir}" executable="/bin/bash" osfamily="unix" failonerror="false" timeout="60000">
+            <arg value="${install.dir}/FunzDaemon_stop.sh"/> 
+        </exec>
+    </target>
+
+    <!-- help -->
+    <target name="help" description="display the help on standard output">
+        <echo message="********************************" />
+        <echo message="    Funz ${code.name} plugin" />
+        <echo message="********************************" />
+        <echo />
+        <echo message="help                  :   display this help" />
+        <echo message="clean                 :   clean build, dist and temp directories" />
+        <echo message="dist                  :   generate the distribution" />
+        <echo message="run-reference-cases   :   launch Funz on reference cases (check carefuly the results !)" />
+        <echo message="test                  :   launch the plugin's tests" />        
+        <echo message="pack-plugin           :   generate a distribution (this plugin only)" />
+        <echo message="pack-with-funz        :   generate a package (Funz + this plugin)" />
+    </target>
+
+</project>
