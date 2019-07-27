@@ -87,7 +87,7 @@
     <!-- copy resources in dist dir -->
     <target name="samples">
         <mkdir dir="${dist.samples.dir}" />
-        <copy todir="${dist.samples.dir}">
+        <copy todir="${dist.samples.dir}" failonerror="false">
             <fileset dir="${samples.dir}">
                 <include name="*" />
             </fileset>
@@ -96,7 +96,7 @@
 
     <target name="scripts">
         <mkdir dir="${dist.scripts.dir}" />
-        <copy todir="${dist.scripts.dir}">
+        <copy todir="${dist.scripts.dir}" failonerror="false">
             <fileset dir="${scripts.dir}">
                 <include name="*" />
             </fileset>
@@ -107,7 +107,7 @@
 
     <target name="libs">
         <mkdir dir="${dist.lib.dir}" />
-        <copy todir="${dist.lib.dir}">
+        <copy todir="${dist.lib.dir}" failonerror="false">
             <fileset dir="${lib.dir}">
                 <include name="*" />
             </fileset>
