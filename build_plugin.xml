@@ -84,6 +84,7 @@
         <delete dir="${install.dir}" />
     </target>
 
+
     <!-- copy resources in dist dir -->
     <target name="samples">
         <mkdir dir="${dist.samples.dir}" />
@@ -115,6 +116,7 @@
         </copy>
     </target>
     
+
     <!-- dist: compile the plugin classes and create 2 jars -->
     <target name="dist-iopluginjar" depends="samples, scripts, libs, get-funz">
         <mkdir dir="${build.dir}" />
@@ -172,6 +174,7 @@
         </copy>
     </target>
 
+
     <!-- install a copy of funz and a copy of the plugin. Needed for test or (full) pack-->
     <target name="install" depends="get-funz, dist">
         <copy todir="${install.dir}" includeemptydirs="yes">
@@ -203,6 +206,7 @@
         <chmod dir="${install.dir}" perm="ugo+rx" includes="**/*.sh"/>
         <chmod dir="${install.dir}" perm="ugo+rx" includes="**/*.bat"/>
     </target>
+
 
     <!-- run reference cases. Just put input files inside src/test/cases/testname/* (usually, testname is the first input file name) -->
     <target name="run-reference-cases" depends="install">
@@ -269,6 +273,42 @@
             <arg value="${install.dir}/FunzDaemon_stop.sh"/> 
         </exec>
     </target>
+
+
+    <!-- launch tests for ascii plugin -->
+    <target name="test-ioplugin" depends="dist-ioplugin" >
+        <dirset id="tests" dir="${test.cases.dir}" includes="*"/>
+        <pathconvert pathsep=" " property="tests.list" refid="tests">
+            <map from="${test.cases.dir}/" to=""/>
+        </pathconvert>
+        
+        <java dir="${test.cases.dir}" classpathref="test.classpath"
+              classname="org.funz.ioplugin.BasicIOPlugin" fork="true" failonerror="true" >
+            <assertions>
+                <enable/>
+            </assertions>
+            <arg value="file:${ioplugin.dir}/${code.name}.ioplugin" />
+            <arg line="${tests.list}" />
+        </java>
+    </target>
+
+    <!-- launch tests for jar plugin -->
+    <target name="test-iopluginjar" depends="dist-iopluginjar" >
+        <dirset id="tests" dir="${test.cases.dir}" includes="*"/>
+        <pathconvert pathsep=" " property="tests.list" refid="tests">
+            <map from="${test.cases.dir}/" to=""/>
+        </pathconvert>
+        
+        <java dir="${test.cases.dir}" classpathref="test.classpath"
+              classname="org.funz.ioplugin.ExtendedIOPlugin" fork="true" failonerror="true" >
+            <assertions>
+                <enable/>
+            </assertions>
+            <arg value="org.funz.${code.name}.${code.name}IOPlugin" />
+            <arg line="${tests.list}" />
+        </java>
+    </target>
+
 
     <!-- help -->
     <target name="help" description="display the help on standard output">
