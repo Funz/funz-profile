@@ -30,7 +30,7 @@ import = function(...) {
                     devtools::dev_mode(on=F)
                 } else {
                     print(paste0("Using install.packages to install ",l))
-                    try(install.packages(l,lib = lib.loc,keep_outputs=T),silent=F)
+                    try(install.packages(l,lib = lib.loc,keep_outputs=T,repos = 'http://cran.us.r-project.org'),silent=F)
                 }
                 print(paste0("Available packages in ",lib.loc,":\n",paste0(collapse=", ",installed.packages(lib.loc=lib.loc)[,'Package'])))
             } else print(paste0("Loaded package ",l," in ",lib.loc,":\n",paste0(collapse=", ",list.files(lib.loc))))
