@@ -38,8 +38,8 @@
 
     <!-- get empty Funz (given version) -->
     <import file="../funz-profile/proxy_conf.xml"/> <!-- fill with your conf if needed -->
-    <property name="funz-calculator.install.src" value="https://github.com/Funz/funz-calculator/releases/download/v${funz.version}"/>
-    <property name="funz-client.install.src" value="https://github.com/Funz/funz-client/releases/download/v${funz.version}"/>
+    <property name="funz-calculator.install.src" value="https://github.com/Funz/funz-calculator/releases/download/${funz.release}"/>
+    <property name="funz-client.install.src" value="https://github.com/Funz/funz-client/releases/download/${funz.release}"/>
     <target name="get-funz" depends="proxy">
         <if>
             <available file="funz-calculator.zip" type="file" />

@@ -1,0 +1,162 @@
+<project name="build_algorithm" default="test">
+    <!--abstract tasks for algorithm, to be imported in algorithm build.xml-->   
+    
+    <property name="algorithm.properties" location="../funz-profile/algorithm.properties" />
+    <property file="${algorithm.properties}" />
+    <!-- verify that the ${algorithm.properties} file has been set -->
+    <fail message="Set the algorithm properties file ${algorithm.properties} from funz-profile">
+        <condition>
+            <not>
+                <and>
+                    <available file="${algorithm.properties}" type="file" />
+                </and>
+            </not>
+        </condition>
+    </fail>
+
+    <property name="funz.properties" location="../funz-profile/funz.properties" />
+    <property file="${funz.properties}" />
+    <!-- verify that the ${funz.properties} file has been set -->
+    <fail message="Set the funz properties file ${funz.properties} from funz-profile">
+        <condition>
+            <not>
+                <and>
+                    <available file="${funz.properties}" type="file" />
+                </and>
+            </not>
+        </condition>
+    </fail>
+
+    <path id="antcontrib.classpath">
+        <pathelement location="../funz-profile/lib/ant-contrib-0.6.jar" />
+    </path>
+
+    <taskdef name="for" taskname="for" classname="net.sf.antcontrib.logic.For" classpathref="antcontrib.classpath" />
+    <taskdef name="if" taskname="if" classname="net.sf.antcontrib.logic.IfTask" classpathref="antcontrib.classpath" />
+    <taskdef name="propertycopy" taskname="propertycopy" classname="net.sf.antcontrib.property.PropertyCopy" classpathref="antcontrib.classpath" />
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="antcontrib.classpath" />
+
+    <!-- get empty Funz (given version) -->
+    <import file="../funz-profile/proxy_conf.xml"/> <!-- fill with your conf if needed -->
+    <property name="funz-calculator.install.src" value="https://github.com/Funz/funz-calculator/releases/download/${funz.release}"/>
+    <property name="funz-client.install.src" value="https://github.com/Funz/funz-client/releases/download/${funz.release}"/>
+    <property name="plugin-R.install.src" value="https://github.com/Funz/plugin-R/releases/download/${funz.release}-0"/>
+    <target name="get-funzR" depends="proxy">
+        <if>
+            <available file="funz-calculator.zip" type="file" />
+            <then></then>
+            <else>
+                <get src="${funz-calculator.install.src}/funz-calculator.zip" dest="funz-calculator.zip"/>
+            </else>
+        </if>
+        <unzip src="funz-calculator.zip" dest="${funz.dir}" overwrite="true"/>
+        
+        <if>
+            <available file="funz-client.zip" type="file" />
+            <then></then>
+            <else>
+                <get src="${funz-client.install.src}/funz-client.zip" dest="funz-client.zip"/>
+            </else>
+        </if>
+        <unzip src="funz-client.zip" dest="${funz.dir}" overwrite="true"/>
+
+         <if>
+            <available file="plugin-R.zip" type="file" />
+            <then></then>
+            <else>
+                <get src="${plugin-R.install.src}/plugin-R.zip" dest="plugin-R.zip"/>
+            </else>
+        </if>
+        <unzip src="plugin-R.zip" dest="${funz.dir}" overwrite="true"/>
+    </target>
+    
+    <!-- clean: remove all generated files -->
+    <target name="clean" description="clean up">
+        <delete dir="${dist.dir}" failonerror="false" />
+        <delete dir="${funz.dir}" failonerror="false" />
+        <delete dir="${install.dir}" />
+    </target>
+
+
+    <!-- copy resources in dist dir -->
+    <target name="libs">
+        <mkdir dir="${dist.lib.dir}" />
+        <copy todir="${dist.lib.dir}" failonerror="false">
+            <fileset dir="${lib.dir}">
+                <include name="*" />
+                <exclude name="Funz*" />
+            </fileset>
+        </copy>
+    </target>
+    
+
+    <!-- dist: copy the algorithm files -->
+    <target name="dist-algorithm" depends="libs, get-funzR">
+        <mkdir dir="${dist.dir}" />
+        <mkdir dir="${dist.doe.dir}" />
+
+        <copy todir="${dist.doe.dir}">
+            <fileset file="${doe.dir}/*" />
+        </copy>
+    </target>
+
+
+    <!-- install a copy of funz and a copy of the algorithm. Needed for test or (full) pack-->
+    <target name="install" depends="get-funzR, dist">
+        <copy todir="${install.dir}" includeemptydirs="yes">
+            <fileset dir="${funz.dir}" />
+        </copy>
+        <copy todir="${install.dir}" includeemptydirs="yes" overwrite="true">
+            <fileset dir="${dist.dir}" />
+        </copy>
+    </target>
+
+
+    <!-- launch tests for ascii algorithm -->
+    <target name="test-algorithm" >
+        <fileset id="tests" dir="${test.cases.dir}" includes="*"/>
+        <pathconvert pathsep="${line.separator}" property="tests.list" refid="tests">
+            <map from="${test.cases.dir}/" to=""/>
+        </pathconvert>
+
+        <for list="${tests.list}" param="test.name" delimiter="${line.separator}">
+            <sequential>
+                <echo message="========================================="/>
+                <echo message="============= @{test.name} ============="/>
+                <echo message="========================================="/>
+                
+                <record name="@{test.name}.log" action="start" />
+                <exec executable="/bin/bash" osfamily="unix" failonerror="false" resultproperty="@{test.name}.failed">
+                    <arg value="R"/> 
+                    <arg value="-e"/>
+                    <arg value="source('../funz-profile/lib/algorithm.R'); source('${test.cases.dir}/@{test.name}'); test('${doe.dir}/${algorithm.name}.R')"/>
+                </exec>
+                <record name="@{test.name}.log" action="stop"/>
+
+                <if>
+                    <equals arg1="${@{test.name}.failed}" arg2="0" />
+                    <then>
+                    </then>
+                    <else>
+                        <property name="failed" value="1" />
+                    </else>
+                </if>
+            </sequential>
+        </for>
+        <fail message="Test failure detected, check test results." if="failed" />
+    </target>
+
+    <!-- help -->
+    <target name="help" description="display the help on standard output">
+        <echo message="********************************" />
+        <echo message="    Funz ${algorithm.name} algorithm" />
+        <echo message="********************************" />
+        <echo />
+        <echo message="help                  :   display this help" />
+        <echo message="clean                 :   clean build, dist and temp directories" />
+        <echo message="dist                  :   generate the distribution of the algorithm" />
+        <echo message="test                  :   launch the algorithm's tests" />        
+        <echo message="install               :   build working Funz (R plugin included) with this algorithm" />
+    </target>
+
+</project>
