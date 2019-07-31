@@ -1,6 +1,10 @@
-# options(repos="http://cran.irsn.fr")
-lib.loc = normalizePath(file.path("lib"))
-dir.create(lib.loc,showWarnings = F)
+lib = "lib"
+repo = "http://cran.us.r-project.org"
+
+options(repos=repo)
+dir.create(lib,showWarnings = F)
+lib.loc = normalizePath(file.path(lib))
+.libPaths( c( lib.loc , .libPaths() ) )
 
 #' @test import("tidyverse","jsonlite","rlist","github:timelyportfolio/parcoords")
 import = function(...) {
@@ -30,7 +34,7 @@ import = function(...) {
                     devtools::dev_mode(on=F)
                 } else {
                     print(paste0("Using install.packages to install ",l))
-                    try(install.packages(l,lib = lib.loc,keep_outputs=T),silent=F)
+                    try(install.packages(l,lib = lib.loc,keep_outputs=T,repos = repo),silent=F)
                 }
                 print(paste0("Available packages in ",lib.loc,":\n",paste0(collapse=", ",installed.packages(lib.loc=lib.loc)[,'Package'])))
             } else print(paste0("Loaded package ",l," in ",lib.loc,":\n",paste0(collapse=", ",list.files(lib.loc))))
