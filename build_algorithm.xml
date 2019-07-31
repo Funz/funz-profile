@@ -1,6 +1,10 @@
 <project name="build_algorithm" default="test">
     <!--abstract tasks for algorithm, to be imported in algorithm build.xml-->   
     
+    <echo message="********************************" />
+    <echo message="    Funz ${algorithm.name} algorithm" />
+    <echo message="********************************" />
+
     <property name="algorithm.properties" location="../funz-profile/algorithm.properties" />
     <property file="${algorithm.properties}" />
     <!-- verify that the ${algorithm.properties} file has been set -->
@@ -148,15 +152,11 @@
 
     <!-- help -->
     <target name="help" description="display the help on standard output">
-        <echo message="********************************" />
-        <echo message="    Funz ${algorithm.name} algorithm" />
-        <echo message="********************************" />
-        <echo />
         <echo message="help                  :   display this help" />
         <echo message="clean                 :   clean build, dist and temp directories" />
         <echo message="dist                  :   generate the distribution of the algorithm" />
-        <echo message="test                  :   launch the algorithm's tests" />        
         <echo message="install               :   build working Funz (R plugin included) with this algorithm" />
+        <echo message="test                  :   launch the algorithm's tests" />        
     </target>
 
 </project>

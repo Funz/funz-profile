@@ -1,6 +1,10 @@
 <project name="build_plugin" default="test">
     <!--abstract tasks for plugin, to be imported in plugin build.xml-->   
     
+    <echo message="********************************" />
+    <echo message="    Funz ${code.name} plugin" />
+    <echo message="********************************" />
+
     <property name="plugin.properties" location="../funz-profile/plugin.properties" />
     <property file="${plugin.properties}" />
     <!-- verify that the ${plugin.properties} file has been set -->
@@ -176,7 +180,7 @@
 
 
     <!-- install a copy of funz and a copy of the plugin. Needed for test or (full) pack-->
-    <target name="install" depends="get-funz, dist">
+    <target name="install-plugin" depends="get-funz, dist">
         <copy todir="${install.dir}" includeemptydirs="yes">
             <fileset dir="${funz.dir}" />
         </copy>
@@ -196,10 +200,10 @@
         <if>
             <available file="${install.dir}/plugins/calc/${code.name}.cplugin.jar" />
             <then>
-                <replace file="${install.dir}/calculator.xml" token="/CALCULATOR" value="CODE name='${code.name}' cplugin='file:plugins/calc/${code.name}.cplugin.jar' command='./scripts/${code.name}.sh' /&gt;&lt;/CALCULATOR" />
+                <replace file="${install.dir}/calculator.xml" token="/CALCULATOR" value="CODE name='${code.name}' cplugin='file:plugins/calc/${code.name}.cplugin.jar' command='./scripts/${code.name}.sh' /&gt;&#10;&#10;&lt;/CALCULATOR" />
             </then>
             <else>
-                <replace file="${install.dir}/calculator.xml" token="/CALCULATOR" value="CODE name='${code.name}' command='${command}' /&gt;&lt;/CALCULATOR" />
+                <replace file="${install.dir}/calculator.xml" token="/CALCULATOR" value="CODE name='${code.name}' command='${command}' /&gt;&#10;&#10;&lt;/CALCULATOR" />
             </else>
         </if>
     
@@ -209,7 +213,7 @@
 
 
     <!-- run reference cases. Just put input files inside src/test/cases/testname/* (usually, testname is the first input file name) -->
-    <target name="run-reference-cases" depends="install">
+    <target name="run-reference-cases" depends="install-plugin">
         <exec dir="${install.dir}" executable="/bin/bash" osfamily="unix" failonerror="false" timeout="60000">
             <arg value="${install.dir}/FunzDaemon_start.sh"/> 
             <arg value="1"/> 
@@ -312,13 +316,10 @@
 
     <!-- help -->
     <target name="help" description="display the help on standard output">
-        <echo message="********************************" />
-        <echo message="    Funz ${code.name} plugin" />
-        <echo message="********************************" />
-        <echo />
         <echo message="help                  :   display this help" />
         <echo message="clean                 :   clean build, dist and temp directories" />
-        <echo message="dist                  :   generate the distribution" />
+        <echo message="dist                  :   generate the plugin distribution" />
+        <echo message="install               :   generate the Funz+plugin distribution" />
         <echo message="run-reference-cases   :   launch cases to build reference (check carefuly the results !)" />
         <echo message="test                  :   launch the plugin's tests" />        
     </target>
