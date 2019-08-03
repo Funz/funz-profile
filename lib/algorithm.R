@@ -130,9 +130,9 @@ source(file.path("../funz-profile/lib/report.R"))
 import("readr")
 run.algorithm = function(file, options = NULL, fun) {
 
-    print("#### Initialize algorithm ####")
-
     Algorithm_name=gsub("\\.(.*)","",basename(file))
+
+    print(paste0("#### Initialize ",Algorithm_name," ####"))
 
     source(file)
     Algorithm = eval(parse(text=paste("Algorithm <-",Algorithm_name)))
@@ -168,7 +168,7 @@ run.algorithm = function(file, options = NULL, fun) {
     print("#### Initialize report ####")
 
     # source("../../lib/report.R")
-    report_file=paste0("report_",Algorithm_name,"-",output,".Rmd")
+    report_file=paste0("report_",Algorithm_name,"-",paste0(collapse=",",output),".Rmd")
     if (!is.null(options))  # will use report_seed=1.md if option seed was modified from default values
         report_file = gsub("report",paste0("report_",paste0(names(options),"=",options,collapse="_")),report_file)
 
