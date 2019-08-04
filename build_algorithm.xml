@@ -64,7 +64,10 @@
         </if>
         <unzip src="funz-client.zip" dest="${funz.dir}" overwrite="true"/>
 
-         <if>
+        <chmod dir="${funz.dir}" perm="ugo+rx" includes="**/*.sh"/>
+        <chmod dir="${funz.dir}" perm="ugo+rx" includes="**/*.bat"/>
+        
+        <if>
             <available file="plugin-R.zip" type="file" />
             <then></then>
             <else>
@@ -72,6 +75,8 @@
             </else>
         </if>
         <unzip src="plugin-R.zip" dest="${funz.dir}" overwrite="true"/>
+         
+        <replace file="${funz.dir}/calculator.xml" token="/CALCULATOR" value="CODE name='R' command='./scripts/R.sh' /&gt;&#10;&#10;&lt;/CALCULATOR" />
     </target>
     
     <!-- clean: remove all generated files -->
