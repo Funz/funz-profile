@@ -118,6 +118,9 @@
         <copy todir="${install.dir}" includeemptydirs="yes" overwrite="true">
             <fileset dir="${dist.dir}" />
         </copy>
+        
+        <chmod dir="${install.dir}" perm="ugo+rx" includes="**/*.sh"/>
+        <chmod dir="${install.dir}" perm="ugo+rx" includes="**/*.bat"/>
     </target>
 
 
