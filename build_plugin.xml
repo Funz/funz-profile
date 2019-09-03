@@ -308,14 +308,14 @@
             <assertions>
                 <enable/>
             </assertions>
+	    <sysproperty key="app.home" value="${dist.dir}"/> <!-- setup root dir for static dependencies (eg. jar) -->
             <arg value="org.funz.${code.name}.${code.name}IOPlugin" />
             <arg line="${tests.list}" />
         </java>
     </target>
 
-	<target name="read-output-tests" depends="install">
-	
-	    <dirset id="tests" dir="${test.cases.dir}" includes="*"/>
+    <target name="read-output-tests" depends="install">
+	<dirset id="tests" dir="${test.cases.dir}" includes="*"/>
         <pathconvert pathsep="${line.separator}" property="tests.list" refid="tests">
             <map from="${test.cases.dir}/" to=""/>
         </pathconvert>
@@ -366,9 +366,8 @@
         
 	</target>
 	
-	<target name="parse-input-tests" depends="install">
-	
-	    <dirset id="tests" dir="${test.cases.dir}" includes="*"/>
+    <target name="parse-input-tests" depends="install">
+	<dirset id="tests" dir="${test.cases.dir}" includes="*"/>
         <pathconvert pathsep="${line.separator}" property="tests.list" refid="tests">
             <map from="${test.cases.dir}/" to=""/>
         </pathconvert>
