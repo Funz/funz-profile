@@ -305,6 +305,7 @@
         
         <java dir="${test.cases.dir}" classpathref="test.classpath"
               classname="org.funz.ioplugin.ExtendedIOPlugin" fork="true" failonerror="true" >
+            <sysproperty key="app.home" value="${dist.dir}"/> <!-- setup root dir for static dependencies (eg. jar) -->
             <assertions>
                 <enable/>
             </assertions>
