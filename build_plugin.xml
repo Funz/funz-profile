@@ -143,7 +143,7 @@
         <jar destfile="${dist.plugin.io.dir}/${code.name}.ioplugin.jar">
             <fileset dir="${build.dir}">
                 <include name="org/funz/**/${code.name}IOPlugin*.class" />
-                <include name="org/funz/**/*Helper.class" />
+                <include name="org/funz/**/*Helper*.class" />
             </fileset>
         </jar>
 
@@ -159,7 +159,7 @@
         <jar destfile="${dist.plugin.calc.dir}/${code.name}.cplugin.jar">
             <fileset dir="${build.dir}">
                 <include name="org/funz/**/${code.name}CPlugin*.class" />
-                <include name="org/funz/**/*Helper.class" />
+                <include name="org/funz/**/*Helper*.class" />
             </fileset>
         </jar>
     </target>
