@@ -201,7 +201,9 @@ run.algorithm = function(file, options = NULL, fun) {
         save(list=ls(all.names = T),file=paste0(report_file,".Rdata"))
 
         t1 = Sys.time()-t0
-        print.md(paste0("Iteration ",i, " (in ",format(t1,digits=3),")"),displayResultsTmp(algorithm,Xi,Yi),xml = T,file = report_file)
+        result_tmp = displayResultsTmp(algorithm,Xi,Yi)
+        print.md(paste0("Iteration ",i, " (in ",format(t1,digits=3),")"),
+                 result_tmp,xml = T,file = report_file)
         t0 <- Sys.time()
 
         print(paste0("#### Apply algorithm on function #### : Iteration ",i))
