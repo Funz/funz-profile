@@ -1,8 +1,8 @@
-lib = "lib"
+lib = "libR"
 repo = "http://cran.us.r-project.org"
 
 options(repos=repo)
-dir.create(lib,showWarnings = F)
+dir.create(lib,showWarnings = T)
 lib.loc = normalizePath(file.path(lib))
 .libPaths( c( lib.loc , .libPaths() ) )
 
