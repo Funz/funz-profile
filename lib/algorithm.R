@@ -132,7 +132,7 @@ read.algorithm = function(file,info="help"){
 }
 
 #@test list.results("<HTML name='minimum'>minimum is 0.523431237543406 found at  = 0.543459029033452; = 0.173028395040855<br/><img src='pairs_10.png' width='600' height='600'/></HTML> <min> 0.523431237543406 </min> <argmin>[ 0.543459029033452,0.173028395040855 ]</argmin>")
-source(file.path(CRISTALGO_HOME,"lib","import.R")); import("xml2", "jsonlite")
+import("xml2", "jsonlite")
 list.results = function(result) {
     all_results = xml2::xml_children(xml2::read_xml(paste0("<result>",result,"</result>")))
     result_list = list()
