@@ -4,6 +4,7 @@ source(file.path("../funz-profile/lib/import.R"))
 #' @test parse.algorithm("../algorithms/RSUR.R")
 #' @test gsub(perl = T,"(,)(?=(?:[^']|'[^']*')*$)",';',"a=1,b=2,c='list(1,2)'")
 parse.algorithm = function(file){
+    if (!file.exists(file)) stop("Cannot find Algorithm file ",file)
     lines=readLines(file)
 
     name=unlist(strsplit(file,"/"))
@@ -19,6 +20,7 @@ parse.algorithm = function(file){
     output="?"
     requires=NULL
     options = list()
+    options.default = list()
     options.help = list()
 
     for (i in 1:length(lines)) {
@@ -44,6 +46,8 @@ parse.algorithm = function(file){
             for (os in options_str[[1]]){
                 ko <- gsub(" ","",fixed=T,unlist(strsplit(unlist(os),"=")))
                 options[[ko[1]]]=gsub("'","",ko[2])
+                #print(paste0(ko[1],": ", ko[2]," -> ",gsub("(\\|)(.*)","",ko[2])))
+                options.default[[ko[1]]]=gsub("'","",gsub("(\\|)(.*)","",ko[2]))
                 options.help[[ko[1]]]="?"
             }
         } else if (strtrim(lines[i],14)=="#options.help:") {
@@ -67,7 +71,7 @@ parse.algorithm = function(file){
 
     if (exists("requires")) import(gsub(" ","",fixed=T,requires))
 
-    return(list(name=name,authors=authors,references=references,help=help,type=tolower(type),output=output,options=options,options.help=options.help,requires=requires,envir=e))
+    return(list(name=name,authors=authors,references=references,help=help,type=tolower(type),output=output,options=options,options.default=options.default,options.help=options.help,requires= gsub(" ","",requires),envir=e))
 }
 
 #' @test get.algorithm("algorithms/EGO.R","help")
@@ -86,6 +90,7 @@ read.algorithm = function(file,info="help"){
     output=NA
     requires=NA
     options = list()
+    options.default = list()
     options.help = list()
 
     for (i in 1:length(lines)) {
@@ -111,6 +116,7 @@ read.algorithm = function(file,info="help"){
             for (os in options_str[[1]]){
                 ko <- unlist(strsplit(unlist(os),"="))
                 options[[ko[1]]]=gsub("'","",ko[2])
+                options.default[[ko[1]]]=gsub("'","",gsub("(\\|)(.*)","",ko[2]))
             }
         } else if (strtrim(lines[i],14)=="#options.help:") {
             str_repl = gsub(perl = T,"(,)(?=(?:[^']|'[^']*')*$)",';',sub("#options.help:\\s*","",lines[i]))
@@ -122,7 +128,21 @@ read.algorithm = function(file,info="help"){
         }
     }
 
-    return(list(name=name,authors=authors,help=help,type=tolower(type),output=output,requires=requires,options=options,options.help=options.help)[[info]])
+    return(list(name=name,authors=authors,help=help,type=tolower(type),output=output,requires= gsub(" ","",requires),options=options,options.default=options.default,options.help=options.help)[[info]])
+}
+
+#@test list.results("<HTML name='minimum'>minimum is 0.523431237543406 found at  = 0.543459029033452; = 0.173028395040855<br/><img src='pairs_10.png' width='600' height='600'/></HTML> <min> 0.523431237543406 </min> <argmin>[ 0.543459029033452,0.173028395040855 ]</argmin>")
+import("xml2", "jsonlite")
+list.results = function(result) {
+    all_results = xml2::xml_children(xml2::read_xml(paste0("<result>",result,"</result>")))
+    result_list = list()
+    for (a in all_results) {
+        if (xml2::xml_name(a)=="HTML")
+            result_list[[xml2::xml_name(a)]] = gsub("\"","\\\"",xml2::xml_text(a))
+        else
+            try({result_list[[xml2::xml_name(a)]] <- jsonlite::fromJSON(gsub("'","\\'",xml2::xml_text(a)))})
+    }
+    result_list
 }
 
 source(file.path("../funz-profile/lib/report.R"))
@@ -228,11 +248,7 @@ run.algorithm = function(file, options = NULL, fun) {
     print.md("Result",result,xml = T,file = report_file)
 
     import("xml2")
-    all_results = xml_children(read_xml(paste0("<result>",result,"</result>")))
-    result_list = list()
-    for (a in all_results) {
-        result_list[[xml_name(a)]] = xml_text(a)
-    }
+    result_list = list.results(result)
 
     print("#### Build report ####")
 

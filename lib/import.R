@@ -1,16 +1,17 @@
-lib = "libR"
-repo = "http://cran.us.r-project.org"
+options(data.frame(repos="http://cran.mirror.garr.it/mirrors/CRAN/"))#http://cran.irsn.fr")
+lib.loc = normalizePath(file.path(getwd(),"lib"))
+dir.create(lib.loc,showWarnings = F)
+.libPaths(lib.loc)
 
-options(repos=repo)
-dir.create(lib,showWarnings = T)
-lib.loc = normalizePath(file.path(lib))
-.libPaths( c( lib.loc , .libPaths() ) )
+import.info = FALSE
 
 #' @test import("tidyverse","jsonlite","rlist","github:timelyportfolio/parcoords")
 import = function(...) {
     libs <- list(...)
-    for (l in unlist(libs)) { # GitHub or ....
-        if (isTRUE(grep(":",l)==1)) {
+    if (!is.na(libs))
+    if (length(libs)>0)
+    for (l in na.exclude(unlist(libs))) {
+        if (isTRUE(grep(":",l)==1)) { # GitHub or ...
             src=gsub(":.*","",l)
             n=gsub(".*/","",l)
             path=gsub(".*:","",gsub("/[a-zA-Z0-9]*","",l))
@@ -20,28 +21,35 @@ import = function(...) {
             path=NULL
         }
 
+        if (import.info) info = function(t) {cat(t);cat("\n")} else info = function(t){}
+
         in_base = F
-        try(in_base <- library(n,logical.return = T,character.only = T),silent = T)
+        try(in_base <- library(n,logical.return = T,character.only = T, quietly = T),silent = T)
         if (!in_base) {
             in_loc = F
-            try(in_loc <- library(n,logical.return = T,character.only = T,lib.loc = lib.loc) ,silent = T)
+            try(in_loc <- library(n,logical.return = T,character.only = T, quietly = T,lib.loc = lib.loc) ,silent = T)
             if (!in_loc) {
                 if (!is.null(src)) {
-                    print(paste0("Using devtools to install ",l))
+                    info(paste0("Using devtools to install ",l))
                     import("devtools")
                     devtools::dev_mode(on=T,path = lib.loc)
                     eval(parse(text=paste0("try(devtools::install_",src,"(file.path(path,n),force=T))")))
                     devtools::dev_mode(on=F)
                 } else {
-                    print(paste0("Using install.packages to install ",l))
-                    try(install.packages(l,lib = lib.loc,keep_outputs=T,repos = repo),silent=F)
+                    info(paste0("Using install.packages to install ",l))
+                    try(install.packages(l,lib = lib.loc,keep_outputs=T,dependencies=T),silent=F)
                 }
-                print(paste0("Available packages in ",lib.loc,":\n",paste0(collapse=", ",installed.packages(lib.loc=lib.loc)[,'Package'])))
-            } else print(paste0("Loaded package ",l," in ",lib.loc,":\n",paste0(collapse=", ",list.files(lib.loc))))
+                info(paste0("Available packages in ",lib.loc,": ",paste0(collapse=", ",installed.packages(lib.loc=lib.loc)[,'Package'])))
+            } else info(paste0("Loaded package ",l," in ",lib.loc,": ",paste0(collapse=", ",list.files(lib.loc))))
 
-            if (!library(n,logical.return = T,character.only = T,lib.loc = lib.loc))
-                stop(paste0("Cannot load package ",l," as not available in ",lib.loc,":\n",paste0(collapse=", ",list.files(lib.loc))))
-        } else print(paste0("Loaded package ",l," in ",paste0(collapse=", ",.libPaths())))
+            try_load=F
+            try(try_load <- library(n,logical.return = T,character.only = T, quietly = T,lib.loc = lib.loc),silent = T)
+            if (!try_load) {
+                try(try_load <- library(n,logical.return = T,character.only = T, quietly = F,lib.loc = lib.loc),silent = F)
+                stop(paste0("Cannot load package ",l," as not available in ",lib.loc,": ",paste0(collapse=", ",list.files(lib.loc))))
+            }
+        } else
+            info(paste0("Loaded package ",l," in ",paste0(collapse=", ",.libPaths())))
     }
 }
 
