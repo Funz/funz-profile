@@ -126,11 +126,20 @@
 
     <!-- launch tests for ascii algorithm -->
     <target name="test-algorithm" >
+        <!-- convert C:\Users\... in C:/Users/... -->
+        <script language="javascript">
+            var before = project.getProperty("doe.dir");
+            project.setProperty("doe.dir.R", before.replaceAll("\\\\", "/"));
+            
+            var before = project.getProperty("test.cases.dir");
+            project.setProperty("test.cases.dir.R", before.replaceAll("\\\\", "/"));
+        </script>
+
         <fileset id="tests" dir="${test.cases.dir}" includes="*"/>
         <pathconvert pathsep="${line.separator}" property="tests.list" refid="tests">
             <map from="${test.cases.dir}/" to=""/>
         </pathconvert>
-
+        
         <for list="${tests.list}" param="test.name" delimiter="${line.separator}">
             <sequential>
                 <echo message="========================================="/>
@@ -141,7 +150,13 @@
                 <exec executable="/bin/bash" osfamily="unix" failonerror="false" resultproperty="@{test.name}.failed">
                     <arg value="R"/> 
                     <arg value="-e"/>
-                    <arg value="source('../funz-profile/lib/algorithm.R'); source('${test.cases.dir}/@{test.name}'); test('${doe.dir}/${algorithm.name}.R')"/>
+                    <arg value="if (file.exists('.Rprofile')) source('.Rprofile'); source('../funz-profile/lib/algorithm.R'); source('${test.cases.dir.R}/@{test.name}'); test('${doe.dir.R}/${algorithm.name}.R')"/>
+                </exec>
+                <exec executable="cmd.exe" osfamily="windows" failonerror="false" resultproperty="@{test.name}.failed">
+                    <arg value="/c"/> 
+                    <arg value="R"/> 
+                    <arg value="-e"/>
+                    <arg value="if (file.exists('.Rprofile')) source('.Rprofile'); source('../funz-profile/lib/algorithm.R'); source('${test.cases.dir.R}/@{test.name}'); test('${doe.dir.R}/${algorithm.name}.R')"/>
                 </exec>
                 <record name="@{test.name}.log" action="stop"/>
 
