@@ -214,11 +214,15 @@
 
     <!-- run reference cases. Just put input files inside src/test/cases/testname/* (usually, testname is the first input file name) -->
     <target name="run-reference-cases" depends="install-plugin">
-        <exec dir="${install.dir}" executable="/bin/bash" osfamily="unix" failonerror="false" timeout="60000">
-            <arg value="${install.dir}/FunzDaemon_start.sh"/> 
-            <arg value="1"/> 
-        </exec>
-        
+        <if><os family="unix"/><then>
+            <exec dir="${install.dir}" executable="/bin/bash" spawn="true" failonerror="false" timeout="60000">
+                <arg value="${install.dir}/FunzDaemon.sh"/> 
+            </exec>
+        </then><else>
+            <exec dir="${install.dir}" executable="cmd.exe" spawn="true" failonerror="false" timeout="60000">
+                <arg value="${install.dir}/FunzDaemon.bat"/> 
+            </exec>
+        </else></if>
      
         <dirset id="tests" dir="${test.cases.dir}" includes="*"/>
         <pathconvert pathsep="${line.separator}" property="tests.list" refid="tests">
@@ -257,12 +261,21 @@
                 <echo level="error">Start: ${startDate}</echo>
                 
                 <record name="@{test.name}.log" action="start" />
-                <exec dir="${test.cases.dir}/@{test.name}" executable="/bin/bash" osfamily="unix" failonerror="false"> <!-- timeout="60000" -->
-                    <arg value="${install.dir}/Funz.sh"/> 
-                    <arg value="Run"/> 
-                    <arg value="-m ${code.name}"/>
-                    <arg value="-if @{test.name} ${input.list.@{test.name}}" /> <!-- add other files given there -->
-                </exec>
+                <if><os family="unix"/><then>
+                    <exec dir="${test.cases.dir}/@{test.name}" executable="/bin/bash"  failonerror="false"> <!-- timeout="60000" -->
+                        <arg value="${install.dir}/Funz.sh"/> 
+                        <arg value="Run"/> 
+                        <arg value="-m ${code.name}"/>
+                        <arg value="-if @{test.name} ${input.list.@{test.name}}" /> <!-- add other files given there -->
+                    </exec>
+                </then><else>
+                    <exec dir="${test.cases.dir}/@{test.name}" executable="cmd.exe" failonerror="false"> <!-- timeout="60000" -->
+                        <arg value="${install.dir}/Funz.bat"/> 
+                        <arg value="Run"/> 
+                        <arg value="-m ${code.name}"/>
+                        <arg value="-if @{test.name} ${input.list.@{test.name}}" /> <!-- add other files given there -->
+                    </exec>
+                </else></if>
                 <record name="@{test.name}.log" action="stop"/>
                 
                 <script language="javascript">
@@ -272,10 +285,15 @@
             </sequential>
         </for>
         
-        
-        <exec dir="${install.dir}" executable="/bin/bash" osfamily="unix" failonerror="false" timeout="60000">
-            <arg value="${install.dir}/FunzDaemon_stop.sh"/> 
-        </exec>
+        <if><os family="unix"/><then>
+            <exec dir="${install.dir}" executable="/bin/bash" spawn="true" failonerror="false" timeout="60000">
+                <arg value="${install.dir}/FunzDaemon_stop.sh"/> 
+            </exec>
+        </then><else>
+            <exec dir="${install.dir}" executable="cmd.exe" spawn="true" failonerror="false" timeout="60000">
+                <arg value="${install.dir}/FunzDaemon_stop.bat"/> 
+            </exec>
+        </else></if>
     </target>
 
 

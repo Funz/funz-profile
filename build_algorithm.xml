@@ -75,8 +75,12 @@
             </else>
         </if>
         <unzip src="plugin-R.zip" dest="${funz.dir}" overwrite="true"/>
-         
-        <replace file="${funz.dir}/calculator.xml" token="/CALCULATOR" value="CODE name='R' command='./scripts/R.sh' /&gt;&#10;&#10;&lt;/CALCULATOR" />
+
+        <if><os family="unix"/><then>
+            <replace file="${funz.dir}/calculator.xml" token="/CALCULATOR" value="CODE name='R' command='./scripts/R.sh' /&gt;&#10;&#10;&lt;/CALCULATOR" />
+        </then><else>
+            <replace file="${funz.dir}/calculator.xml" token="/CALCULATOR" value="CODE name='R' command='.\scripts\R.bat' /&gt;&#10;&#10;&lt;/CALCULATOR" />
+        </else></if>
     </target>
     
     <!-- clean: remove all generated files -->
@@ -147,17 +151,20 @@
                 <echo message="========================================="/>
                 
                 <record name="@{test.name}.log" action="start" />
-                <exec executable="/bin/bash" osfamily="unix" failonerror="false" resultproperty="@{test.name}.failed">
-                    <arg value="R"/> 
-                    <arg value="-e"/>
-                    <arg value="if (file.exists('.Rprofile')) source('.Rprofile'); source('../funz-profile/lib/algorithm.R'); source('${test.cases.dir.R}/@{test.name}'); test('${doe.dir.R}/${algorithm.name}.R')"/>
-                </exec>
-                <exec executable="cmd.exe" osfamily="windows" failonerror="false" resultproperty="@{test.name}.failed">
-                    <arg value="/c"/> 
-                    <arg value="R"/> 
-                    <arg value="-e"/>
-                    <arg value="if (file.exists('.Rprofile')) source('.Rprofile'); source('../funz-profile/lib/algorithm.R'); source('${test.cases.dir.R}/@{test.name}'); test('${doe.dir.R}/${algorithm.name}.R')"/>
-                </exec>
+                <if><os family="unix"/><then>
+                    <exec executable="/bin/bash" failonerror="false" resultproperty="@{test.name}.failed">
+                        <arg value="R"/> 
+                        <arg value="-e"/>
+                        <arg value="if (file.exists('.Rprofile')) source('.Rprofile'); source('../funz-profile/lib/algorithm.R'); source('${test.cases.dir.R}/@{test.name}'); test('${doe.dir.R}/${algorithm.name}.R')"/>
+                    </exec>
+                </then><else>
+                    <exec executable="cmd.exe" failonerror="false" resultproperty="@{test.name}.failed">
+                        <arg value="/c"/> 
+                        <arg value="R"/> 
+                        <arg value="-e"/>
+                        <arg value="if (file.exists('.Rprofile')) source('.Rprofile'); source('../funz-profile/lib/algorithm.R'); source('${test.cases.dir.R}/@{test.name}'); test('${doe.dir.R}/${algorithm.name}.R')"/>
+                    </exec>
+                </else></if>
                 <record name="@{test.name}.log" action="stop"/>
 
                 <if>
