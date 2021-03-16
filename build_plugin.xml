@@ -368,12 +368,21 @@
                 <echo level="error">Start: ${startDate}</echo>
                 
                 <record name="@{test.name}.log" action="start" />
-                <exec dir="${test.cases.dir}/@{test.name}" executable="/bin/bash" osfamily="unix" failonerror="false" timeout="60000">
-                    <arg value="${install.dir}/Funz.sh"/> 
-                    <arg value="ReadOutput"/> 
-                    <arg value="-m ${code.name}"/>
-                    <arg value="-if ${input.list.@{test.name}} -od output" />
-                </exec>
+                <if><os family="unix"/><then>
+                    <exec dir="${test.cases.dir}/@{test.name}" executable="/bin/bash" failonerror="false" timeout="60000">
+                        <arg value="${install.dir}/Funz.sh"/> 
+                        <arg value="ReadOutput"/> 
+                        <arg value="-m ${code.name}"/>
+                        <arg value="-if ${input.list.@{test.name}} -od output" />
+                    </exec>
+                </then><else>
+                    <exec dir="${test.cases.dir}/@{test.name}" executable="cmd.exe" failonerror="false" timeout="60000">
+                        <arg value="${install.dir}/Funz.bat"/> 
+                        <arg value="ReadOutput"/> 
+                        <arg value="-m ${code.name}"/>
+                        <arg value="-if ${input.list.@{test.name}} -od output" />
+                    </exec>
+                </else></if>
                 <record name="@{test.name}.log" action="stop"/>
                 
                 <script language="javascript">
@@ -420,12 +429,21 @@
                 <echo level="error">Start: ${startDate}</echo>
                 
                 <record name="@{test.name}.log" action="start" />
-                <exec dir="${test.cases.dir}/@{test.name}" executable="/bin/bash" osfamily="unix" failonerror="false" timeout="10000">
-                    <arg value="${install.dir}/Funz.sh"/> 
-                    <arg value="ParseInput"/> 
-                    <arg value="-m ${code.name}"/>
-                    <arg value="-if ${input.list.@{test.name}}" />
-                </exec>
+                <if><os family="unix"/><then>
+                    <exec dir="${test.cases.dir}/@{test.name}" executable="/bin/bash" failonerror="false" timeout="10000">
+                        <arg value="${install.dir}/Funz.sh"/> 
+                        <arg value="ParseInput"/> 
+                        <arg value="-m ${code.name}"/>
+                        <arg value="-if ${input.list.@{test.name}}" />
+                    </exec>
+                </then><else>
+                    <exec dir="${test.cases.dir}/@{test.name}" executable="cmd.exe" failonerror="false" timeout="10000">
+                        <arg value="${install.dir}/Funz.bat"/> 
+                        <arg value="ParseInput"/> 
+                        <arg value="-m ${code.name}"/>
+                        <arg value="-if ${input.list.@{test.name}}" />
+                    </exec>
+                </else></if>
                 <record name="@{test.name}.log" action="stop"/>
                 
                 <script language="javascript">
