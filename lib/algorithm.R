@@ -189,8 +189,9 @@ run.algorithm = function(file, options = NULL, fun) {
 
     # source("../../lib/report.R")
     report_file=paste0("report_",Algorithm_name,"-",paste0(collapse=",",output),".Rmd")
+    cleanchar = function(path) gsub("\"","",  gsub("]","", gsub("[","", path ,fixed=T),fixed=T),fixed=T)
     if (!is.null(options))  # will use report_seed=1.md if option seed was modified from default values
-        report_file = gsub("report",paste0("report_",paste0(names(options),"=",options,collapse="_")),report_file)
+        report_file = gsub("report",paste0("report_",paste0(cleanchar(names(options)),"=",cleanchar(options),collapse="_")),report_file)
 
     create.md(paste0(Algorithm_name," / ", output),file = report_file)
     print.md("Algorithm",paste0("```{r eval=F}\n",read_file(file),"```\n"),file = report_file)
