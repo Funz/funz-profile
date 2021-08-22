@@ -1,4 +1,4 @@
-options(data.frame(repos="https://cran.irsn.fr")
+options(data.frame(repos="https://cran.irsn.fr"))
 Sys.setenv(GITHUB_PAT="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") # github clone only token
 lib.loc = normalizePath(file.path(getwd(),"lib"))
 dir.create(lib.loc,showWarnings = F)
