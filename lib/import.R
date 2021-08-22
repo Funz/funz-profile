@@ -3,7 +3,7 @@ lib.loc = normalizePath(file.path(getwd(),"lib"))
 dir.create(lib.loc,showWarnings = F)
 .libPaths(lib.loc)
 
-import.info = FALSE
+import.info = TRUE
 
 #' @test import("tidyverse","jsonlite","rlist","github:timelyportfolio/parcoords")
 import = function(...) {
