@@ -11,7 +11,7 @@ create.md = function(title=getwd(),file="report.Rmd") {
               "---\n"),fill=F,append=F,file=file)
 }
 
-import("xml2","jsonlite","github:timelyportfolio/parcoords","htmltools","crosstalk","DT")
+import("xml2","jsonlite","parcoords","htmltools","crosstalk","DT")
 print.md = function(title=NULL,txt,xml=F,file="report.Rmd") {
     if (isTRUE(xml)) {
         print.md(title,"",xml=F,file=file)
