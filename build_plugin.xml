@@ -1,8 +1,22 @@
 <project name="build_plugin" default="test">
     <!--abstract tasks for plugin, to be imported in plugin build.xml-->   
-    
+
+    <property name="funz.properties" location="../funz-profile/funz.properties" />
+    <property file="${funz.properties}" />
+    <!-- verify that the ${funz.properties} file has been set -->
+    <fail message="Set the funz properties file ${funz.properties} from funz-profile">
+        <condition>
+            <not>
+                <and>
+                    <available file="${funz.properties}" type="file" />
+                </and>
+            </not>
+        </condition>
+    </fail>
+    <property name="funz.release" value="v${core.version}" />
+
     <echo message="********************************" />
-    <echo message="    Funz ${code.name} plugin" />
+    <echo message="    Funz ${funz.release} ${code.name} plugin" />
     <echo message="********************************" />
 
     <property name="plugin.properties" location="../funz-profile/plugin.properties" />
@@ -17,20 +31,7 @@
             </not>
         </condition>
     </fail>
-
-    <property name="funz.properties" location="../funz-profile/funz.properties" />
-    <property file="${funz.properties}" />
-    <!-- verify that the ${funz.properties} file has been set -->
-    <fail message="Set the funz properties file ${funz.properties} from funz-profile">
-        <condition>
-            <not>
-                <and>
-                    <available file="${funz.properties}" type="file" />
-                </and>
-            </not>
-        </condition>
-    </fail>
-
+    
     <path id="antcontrib.classpath">
         <pathelement location="../funz-profile/lib/ant-contrib-0.6.jar" />
     </path>

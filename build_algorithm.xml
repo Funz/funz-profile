@@ -1,8 +1,22 @@
 <project name="build_algorithm" default="test">
     <!--abstract tasks for algorithm, to be imported in algorithm build.xml-->   
     
+    <property name="funz.properties" location="../funz-profile/funz.properties" />
+    <property file="${funz.properties}" />
+    <!-- verify that the ${funz.properties} file has been set -->
+    <fail message="Set the funz properties file ${funz.properties} from funz-profile">
+        <condition>
+            <not>
+                <and>
+                    <available file="${funz.properties}" type="file" />
+                </and>
+            </not>
+        </condition>
+    </fail>
+    <property name="funz.release" value="v${core.version}" />
+
     <echo message="********************************" />
-    <echo message="    Funz ${algorithm.name} algorithm" />
+    <echo message="    Funz ${funz.release} ${algorithm.name} algorithm" />
     <echo message="********************************" />
 
     <property name="algorithm.properties" location="../funz-profile/algorithm.properties" />
@@ -17,20 +31,7 @@
             </not>
         </condition>
     </fail>
-
-    <property name="funz.properties" location="../funz-profile/funz.properties" />
-    <property file="${funz.properties}" />
-    <!-- verify that the ${funz.properties} file has been set -->
-    <fail message="Set the funz properties file ${funz.properties} from funz-profile">
-        <condition>
-            <not>
-                <and>
-                    <available file="${funz.properties}" type="file" />
-                </and>
-            </not>
-        </condition>
-    </fail>
-
+    
     <path id="antcontrib.classpath">
         <pathelement location="../funz-profile/lib/ant-contrib-0.6.jar" />
     </path>
