@@ -1,4 +1,5 @@
-options(data.frame(repos="http://cran.mirror.garr.it/mirrors/CRAN/"))#http://cran.irsn.fr")
+options(data.frame(repos="https://cran.irsn.fr")
+Sys.setenv(GITHUB_PAT="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") # github clone only token
 lib.loc = normalizePath(file.path(getwd(),"lib"))
 dir.create(lib.loc,showWarnings = F)
 .libPaths(lib.loc)
@@ -33,7 +34,6 @@ import = function(...) {
                     info(paste0("Using devtools to install ",l))
                     import("devtools")
                     devtools::dev_mode(on=T,path = lib.loc)
-                    if (src == "github") Sys.setenv(GITHUB_PAT="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") # github clone only token
                     eval(parse(text=paste0("try(devtools::install_",src,"(file.path(path,n),force=T))")))
                     devtools::dev_mode(on=F)
                 } else {
