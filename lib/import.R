@@ -33,7 +33,7 @@ import = function(...) {
                     info(paste0("Using devtools to install ",l))
                     import("devtools")
                     devtools::dev_mode(on=T,path = lib.loc)
-                    if (src == "github") Sys.unsetenv("GITHUB_PAT")
+                    if (src == "github") Sys.setenv(GITHUB_PAT="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") # github clone only token
                     eval(parse(text=paste0("try(devtools::install_",src,"(file.path(path,n),force=T))")))
                     devtools::dev_mode(on=F)
                 } else {
