@@ -216,11 +216,11 @@
     <!-- run reference cases. Just put input files inside src/test/cases/testname/* (usually, testname is the first input file name) -->
     <target name="run-reference-cases" depends="install-plugin">
         <if><os family="unix"/><then>
-            <exec dir="${install.dir}" executable="/bin/bash" spawn="true" failonerror="false" timeout="60000">
+            <exec dir="${install.dir}" executable="/bin/bash" spawn="true" failonerror="false">
                 <arg value="${install.dir}/FunzDaemon.sh"/> 
             </exec>
         </then><else>
-            <exec dir="${install.dir}" executable="cmd.exe" spawn="true" failonerror="false" timeout="60000">
+            <exec dir="${install.dir}" executable="cmd.exe" spawn="true" failonerror="false">
                 <arg value="${install.dir}/FunzDaemon.bat"/> 
             </exec>
         </else></if>
@@ -287,11 +287,11 @@
         </for>
         
         <if><os family="unix"/><then>
-            <exec dir="${install.dir}" executable="/bin/bash" spawn="true" failonerror="false" timeout="60000">
+            <exec dir="${install.dir}" executable="/bin/bash" spawn="true" failonerror="false">
                 <arg value="${install.dir}/FunzDaemon_stop.sh"/> 
             </exec>
         </then><else>
-            <exec dir="${install.dir}" executable="cmd.exe" spawn="true" failonerror="false" timeout="60000">
+            <exec dir="${install.dir}" executable="cmd.exe" spawn="true" failonerror="false">
                 <arg value="${install.dir}/FunzDaemon_stop.bat"/> 
             </exec>
         </else></if>
