@@ -46,23 +46,28 @@
     <property name="funz-calculator.install.src" value="https://github.com/Funz/funz-calculator/releases/download/${funz.release}"/>
     <property name="funz-client.install.src" value="https://github.com/Funz/funz-client/releases/download/${funz.release}"/>
     <target name="get-funz" depends="proxy">
-        <if>
-            <available file="funz-calculator.zip" type="file" />
+        <if><available file="${funz.dir}" type="dir" />
+        <then>
+            <echo message="Funz dir already exists. Skipping download..."/>
+        </then>
+        <else>
+            <if><available file="funz-calculator.zip" type="file" />
             <then></then>
             <else>
                 <get src="${funz-calculator.install.src}/funz-calculator.zip" dest="funz-calculator.zip"/>
             </else>
-        </if>
-        <unzip src="funz-calculator.zip" dest="${funz.dir}" overwrite="true"/>
-        
-        <if>
-            <available file="funz-client.zip" type="file" />
+            </if>
+            <unzip src="funz-calculator.zip" dest="${funz.dir}" overwrite="true"/>
+
+            <if><available file="funz-client.zip" type="file" />
             <then></then>
             <else>
                 <get src="${funz-client.install.src}/funz-client.zip" dest="funz-client.zip"/>
             </else>
+            </if>
+            <unzip src="funz-client.zip" dest="${funz.dir}" overwrite="true"/>
+        </else>
         </if>
-        <unzip src="funz-client.zip" dest="${funz.dir}" overwrite="true"/>
     </target>
     
     <!-- pathes and classpathes -->
@@ -247,6 +252,9 @@
                     <filename name="*"/>
                     <filename name="**"/>
                     <exclude name="@{test.name}"/>
+                    <exclude name="Run.*"/>
+                    <exclude name="cases.xml"/>
+                    <exclude name="report.md"/>
                     <exclude name="input"/>
                     <exclude name="output"/>
                     <exclude name="info.txt"/>
@@ -267,14 +275,18 @@
                         <arg value="${install.dir}/Funz.sh"/> 
                         <arg value="Run"/> 
                         <arg value="-m ${code.name}"/>
-                        <arg value="-if @{test.name} ${input.list.@{test.name}}" /> <!-- add other files given there -->
+                        <arg value="-if @{test.name} ${input.list.@{test.name}}"/>
+                        <arg value="-v 11"/>
+                        <arg value="-ad ${test.cases.dir}/@{test.name}" /> <!-- add other files given there -->
                     </exec>
                 </then><else>
                     <exec dir="${test.cases.dir}/@{test.name}" executable="cmd.exe" failonerror="false"> <!-- timeout="60000" -->
                         <arg value="${install.dir}/Funz.bat"/> 
                         <arg value="Run"/> 
                         <arg value="-m ${code.name}"/>
-                        <arg value="-if @{test.name} ${input.list.@{test.name}}" /> <!-- add other files given there -->
+                        <arg value="-if @{test.name} ${input.list.@{test.name}}"/>
+                        <arg value="-v 11"/>
+                        <arg value="-ad ${test.cases.dir}/@{test.name}" /> <!-- add other files given there -->
                     </exec>
                 </else></if>
                 <record name="@{test.name}.log" action="stop"/>
