@@ -15,7 +15,9 @@ import("xml2","jsonlite","parcoords","htmltools","crosstalk","DT")
 print.md = function(title=NULL,txt,xml=F,file="report.Rmd") {
     if (isTRUE(xml)) {
         print.md(title,"",xml=F,file=file)
-        all = xml_children(read_xml(paste0("<result>",txt,"</result>")))
+	all = NULL
+        try(all <- xml_children(read_xml(paste0("<result>",txt,"</result>"))))
+	if (is.null(all)) {warning(paste0("Could not parse as xml:",txt))}
         r_data = NULL
         r_model = NULL
         for (a in all) {
