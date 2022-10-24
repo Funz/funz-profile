@@ -1,5 +1,3 @@
-source(file.path("../funz-profile/lib/import.R"))
-
 create.md = function(title=getwd(),file="report.Rmd") {
     cat(paste(sep="\n","---",
               paste0("title: '",title,"'"),
@@ -11,7 +9,7 @@ create.md = function(title=getwd(),file="report.Rmd") {
               "---\n"),fill=F,append=F,file=file)
 }
 
-import("xml2","jsonlite","parcoords","htmltools","crosstalk","DT")
+templr::import("xml2","jsonlite","parcoords","htmltools","crosstalk","DT")
 print.md = function(title=NULL,txt,xml=F,file="report.Rmd") {
     if (isTRUE(xml)) {
         print.md(title,"",xml=F,file=file)
@@ -70,7 +68,57 @@ plot.md = function(plot.fun,file="report.Rmd",w=400,h=400,...) {
     cat(paste0("![](",name,")"),fill=F,append=T,file=file)
 }
 
-import("rmarkdown")
+templr::import("rmarkdown")
 report.md = function(file="report.Rmd") {
     render(file)
+}
+
+templr::import("readr")
+run.algorithm <- function(algorithm_file,
+                          fun,
+                          options=NULL) {
+
+    Algorithm_name=gsub("\\.(.*)","",basename(algorithm_file))
+    Algorithm_options = templr::parse.algorithm(algorithm_file)$options
+    if (!is.null(options))
+        for (o in names(options)) Algorithm_options[[o]] = options[[o]]
+
+    report_file=paste0("report_",Algorithm_name,"-",paste0(collapse=",",fun$output),".Rmd")
+    cleanchar = function(path) gsub("\"","",  gsub("]","", gsub("[","", path ,fixed=T),fixed=T),fixed=T)
+    if (!is.null(options))  # will use report_seed=1.md if option seed was modified from default values
+        report_file = gsub("report",paste0("report_",paste0(cleanchar(names(options)),"=",cleanchar(options),collapse="_")),report_file)
+
+    create.md(paste0(Algorithm_name," / ", fun$output),file = report_file)
+    print.md("Algorithm",paste0("```{r eval=F}\n",readr::read_file(algorithm_file),"```\n"),file = report_file)
+    print.md("Parameters",gsub("\\$","*",paste0(collapse="\n",capture.output(str(Algorithm_options))[-1])),file = report_file)
+    if (exists("print.f")) {
+    if (is.function(print.f)) {
+        print.md("Objective",plot.md(print.f),file = report_file)
+    }} else
+        print.md("Objective",paste0("```{r eval=F}\n",paste0(capture.output(print(f)),collapse="\n"),"\n```\n"),file = report_file)
+
+
+    result = NULL
+    tryCatch({
+        result <- templr::run.algorithm(
+            algorithm_file,
+            objective_function=fun$f,
+            input=fun$input,
+            output=fun$output,
+            options=options,
+            work_dir=".",
+            trace=function(...) {
+                print(...)
+                print.md(title=NULL,txt=...,file=report_file)
+            },
+            silent=TRUE,save_data=FALSE)
+    }, error=function(msg) {
+            print.md("ERROR",msg,file=report_file)
+            return(NULL)
+    })
+    
+    print.md("Result",result,xml = T,file = report_file)
+
+    report.md(file = report_file)
+    return(templr::list.results(result))
 }

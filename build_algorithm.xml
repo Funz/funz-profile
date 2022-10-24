@@ -156,14 +156,14 @@
                     <exec executable="/bin/bash" failonerror="false" resultproperty="@{test.name}.failed">
                         <arg value="R"/> 
                         <arg value="-e"/>
-                        <arg value="if (file.exists('.Rprofile')) source('.Rprofile'); source('../funz-profile/lib/algorithm.R'); source('${test.cases.dir.R}/@{test.name}'); test('${doe.dir.R}/${algorithm.name}.R')"/>
+                        <arg value="if (file.exists('.Rprofile')) source('.Rprofile'); if (!('templr' %in% installed.packages())) install.packages('templr'); source('../funz-profile/lib/report.R'); source('${test.cases.dir.R}/@{test.name}'); test('${doe.dir.R}/${algorithm.name}.R')"/>
                     </exec>
                 </then><else>
                     <exec executable="cmd.exe" failonerror="false" resultproperty="@{test.name}.failed">
                         <arg value="/c"/> 
                         <arg value="R"/> 
                         <arg value="-e"/>
-                        <arg value="if (file.exists('.Rprofile')) source('.Rprofile'); source('../funz-profile/lib/algorithm.R'); source('${test.cases.dir.R}/@{test.name}'); test('${doe.dir.R}/${algorithm.name}.R')"/>
+                        <arg value="if (file.exists('.Rprofile')) source('.Rprofile'); if (!('templr' %in% installed.packages())) install.packages('templr'); source('../funz-profile/lib/report.R'); source('${test.cases.dir.R}/@{test.name}'); test('${doe.dir.R}/${algorithm.name}.R')"/>
                     </exec>
                 </else></if>
                 <record name="@{test.name}.log" action="stop"/>
